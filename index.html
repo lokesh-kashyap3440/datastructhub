@@ -5,272 +5,191 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="Interactive Data Structures Visualizer — animated, sound-enabled dashboard for learning DS">
-    <title>DataStructHub — Interactive Data Structures Visualizer</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="description" content="Interactive Data Structures Visualizer">
+    <title>DataStructHub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body>
-    <div class="bg-grid"></div>
-    <div class="bg-glow"></div>
 
-    <div class="app-container">
-        <!-- Navigation Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">⬡</span>
-                    <span class="logo-text">DataStruct<span class="logo-accent">Hub</span></span>
-                </div>
+    <!-- Top Bar -->
+    <header id="topBar">
+        <div id="structureTitle">Array</div>
+        <div id="structureStats">
+            <span id="statSize">0</span>
+            <span id="statSeparator">/</span>
+            <span id="statCapacity">12</span>
+        </div>
+    </header>
+
+    <!-- Tab Bar (was sidebar) -->
+    <nav id="tabBar">
+        <button class="tab active" data-structure="array">
+            <span class="tabIcon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <line x1="9" y1="3" x2="9" y2="21"/>
+                    <line x1="15" y1="3" x2="15" y2="21"/>
+                </svg>
+            </span>
+            <span class="tabLabel">Array</span>
+            <span class="tabDot"></span>
+        </button>
+        <button class="tab" data-structure="linkedlist">
+            <span class="tabIcon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="6" cy="12" r="3"/>
+                    <circle cx="18" cy="12" r="3"/>
+                    <line x1="9" y1="12" x2="15" y2="12"/>
+                </svg>
+            </span>
+            <span class="tabLabel">List</span>
+            <span class="tabDot"></span>
+        </button>
+        <button class="tab" data-structure="stack">
+            <span class="tabIcon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="4" width="16" height="6" rx="1"/>
+                    <rect x="4" y="11" width="16" height="6" rx="1"/>
+                    <rect x="4" y="18" width="16" height="6" rx="1" opacity="0.5"/>
+                </svg>
+            </span>
+            <span class="tabLabel">Stack</span>
+            <span class="tabDot"></span>
+        </button>
+        <button class="tab" data-structure="queue">
+            <span class="tabIcon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="8" width="5" height="8" rx="1"/>
+                    <rect x="10" y="8" width="5" height="8" rx="1"/>
+                    <rect x="17" y="8" width="5" height="8" rx="1" opacity="0.5"/>
+                </svg>
+            </span>
+            <span class="tabLabel">Queue</span>
+            <span class="tabDot"></span>
+        </button>
+        <button class="tab" data-structure="bst">
+            <span class="tabIcon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="5" r="2.5"/>
+                    <circle cx="6" cy="17" r="2.5"/>
+                    <circle cx="18" cy="17" r="2.5"/>
+                    <line x1="12" y1="7.5" x2="6" y2="14.5"/>
+                    <line x1="12" y1="7.5" x2="18" y2="14.5"/>
+                </svg>
+            </span>
+            <span class="tabLabel">BST</span>
+            <span class="tabDot"></span>
+        </button>
+        <button class="tab" data-structure="hashtable">
+            <span class="tabIcon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="6" rx="1"/>
+                    <rect x="3" y="10" width="18" height="6" rx="1"/>
+                    <line x1="7" y1="3" x2="7" y2="9"/>
+                    <line x1="7" y1="10" x2="7" y2="16"/>
+                </svg>
+            </span>
+            <span class="tabLabel">Hash</span>
+            <span class="tabDot"></span>
+        </button>
+        <button class="tab" data-structure="graph">
+            <span class="tabIcon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/>
+                    <circle cx="12" cy="18" r="2"/>
+                    <line x1="8" y1="6" x2="16" y2="6"/>
+                    <line x1="16.5" y1="7" x2="13.5" y2="16.5"/>
+                </svg>
+            </span>
+            <span class="tabLabel">Graph</span>
+            <span class="tabDot"></span>
+        </button>
+        <button class="tab" data-structure="heap">
+            <span class="tabIcon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="4" r="2"/>
+                    <circle cx="6" cy="14" r="2"/><circle cx="18" cy="14" r="2"/>
+                    <line x1="12" y1="6" x2="6" y2="12"/>
+                    <line x1="12" y1="6" x2="18" y2="12"/>
+                </svg>
+            </span>
+            <span class="tabLabel">Heap</span>
+            <span class="tabDot"></span>
+        </button>
+    </nav>
+
+    <!-- Visualization Canvas -->
+    <main id="canvasArea">
+        <div id="visualization">
+            <div id="emptyState">
+                <div class="emptyIcon">📦</div>
+                <div class="emptyTitle">Structure is empty</div>
+                <div class="emptyHint">Add elements to visualize</div>
             </div>
+        </div>
+    </main>
 
-            <nav class="nav-list" id="navList">
-                <button class="nav-item active" data-structure="array">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                            <line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>
-                        </svg>
-                    </span>
-                    <span class="nav-label">Array</span>
-                    <span class="nav-color-dot" style="background:#00e5ff"></span>
-                </button>
+    <!-- Control Panel -->
+    <footer id="controlPanel">
+        <div id="inputRow">
+            <input type="text" id="valueInput" placeholder="Value" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <select id="operationSelect">
+                <option value="insert">Insert</option>
+                <option value="insertAt">Insert At</option>
+                <option value="delete">Delete</option>
+                <option value="deleteAt">Delete At</option>
+                <option value="search">Search</option>
+                <option value="update">Update</option>
+            </select>
+            <input type="number" id="indexInput" placeholder="Idx" style="display:none" autocomplete="off">
+        </div>
+        <div id="buttonRow">
+            <button class="actionBtn primary" id="executeBtn">Execute</button>
+            <button class="actionBtn secondary" id="randomBtn">🎲</button>
+            <button class="actionBtn danger" id="clearBtn">✕</button>
+            <button class="actionBtn icon" id="soundBtn" title="Sound">🔊</button>
+        </div>
+    </footer>
 
-                <button class="nav-item" data-structure="linkedlist">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/>
-                            <line x1="9" y1="12" x2="15" y2="12"/>
-                        </svg>
-                    </span>
-                    <span class="nav-label">Linked List</span>
-                    <span class="nav-color-dot" style="background:#ff0080"></span>
-                </button>
-
-                <button class="nav-item" data-structure="stack">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="4" y="4" width="16" height="6" rx="1"/>
-                            <rect x="4" y="11" width="16" height="6" rx="1"/>
-                            <rect x="4" y="18" width="16" height="6" rx="1" opacity="0.5"/>
-                        </svg>
-                    </span>
-                    <span class="nav-label">Stack</span>
-                    <span class="nav-color-dot" style="background:#ff6b00"></span>
-                </button>
-
-                <button class="nav-item" data-structure="queue">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="8" width="5" height="8" rx="1"/>
-                            <rect x="10" y="8" width="5" height="8" rx="1"/>
-                            <rect x="17" y="8" width="5" height="8" rx="1" opacity="0.5"/>
-                        </svg>
-                    </span>
-                    <span class="nav-label">Queue</span>
-                    <span class="nav-color-dot" style="background:#ffd600"></span>
-                </button>
-
-                <button class="nav-item" data-structure="bst">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="5" r="2.5"/>
-                            <circle cx="6" cy="17" r="2.5"/>
-                            <circle cx="18" cy="17" r="2.5"/>
-                            <line x1="12" y1="7.5" x2="6" y2="14.5"/>
-                            <line x1="12" y1="7.5" x2="18" y2="14.5"/>
-                        </svg>
-                    </span>
-                    <span class="nav-label">Binary Search Tree</span>
-                    <span class="nav-color-dot" style="background:#00ff88"></span>
-                </button>
-
-                <button class="nav-item" data-structure="hashtable">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="6" rx="1"/>
-                            <rect x="3" y="10" width="18" height="6" rx="1"/>
-                            <rect x="3" y="17" width="18" height="6" rx="1"/>
-                            <line x1="7" y1="3" x2="7" y2="9"/><line x1="7" y1="10" x2="7" y2="16"/><line x1="7" y1="17" x2="7" y2="23"/>
-                        </svg>
-                    </span>
-                    <span class="nav-label">Hash Table</span>
-                    <span class="nav-color-dot" style="background:#9b59ff"></span>
-                </button>
-
-                <button class="nav-item" data-structure="graph">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/>
-                            <circle cx="12" cy="18" r="2"/><circle cx="4" cy="14" r="2"/>
-                            <line x1="8" y1="6" x2="16" y2="6"/>
-                            <line x1="16.5" y1="7" x2="13.5" y2="16.5"/>
-                            <line x1="6" y1="8" x2="4.5" y2="12.5"/>
-                        </svg>
-                    </span>
-                    <span class="nav-label">Graph</span>
-                    <span class="nav-color-dot" style="background:#ff3d71"></span>
-                </button>
-
-                <button class="nav-item" data-structure="heap">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="4" r="2"/>
-                            <circle cx="6" cy="14" r="2"/><circle cx="18" cy="14" r="2"/>
-                            <line x1="12" y1="6" x2="6" y2="12"/>
-                            <line x1="12" y1="6" x2="18" y2="12"/>
-                        </svg>
-                    </span>
-                    <span class="nav-label">Heap</span>
-                    <span class="nav-color-dot" style="background:#14f195"></span>
-                </button>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button class="sound-toggle" id="soundToggle" title="Toggle Sound">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="soundOnIcon">
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                    </svg>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="soundOffIcon" style="display:none">
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                        <line x1="23" y1="9" x2="17" y2="15"/>
-                        <line x1="17" y1="9" x2="23" y2="15"/>
-                    </svg>
-                </button>
-                <span class="speed-label">Speed</span>
-                <input type="range" class="speed-slider" id="speedSlider" min="0.5" max="3" step="0.5" value="1">
-                <span class="speed-value" id="speedValue">1x</span>
+    <!-- Complexity Bar -->
+    <div id="complexityBar">
+        <div id="compLabel">Time Complexity</div>
+        <div id="compBars">
+            <div class="compOp">
+                <span class="compName">Acc</span>
+                <div class="compBar" data-value="1"></div>
             </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Top Bar -->
-            <header class="top-bar">
-                <div class="structure-info">
-                    <h1 class="structure-title" id="structureTitle">Array</h1>
-                    <p class="structure-desc" id="structureDesc">A linear collection of elements indexed by integers</p>
-                </div>
-                <div class="structure-stats">
-                    <div class="stat">
-                        <span class="stat-label">Size</span>
-                        <span class="stat-value" id="statSize">0</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Capacity</span>
-                        <span class="stat-value" id="statCapacity">12</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Visualization Canvas -->
-            <div class="canvas-wrapper" id="canvasWrapper">
-                <div class="visualization" id="visualization">
-                    <!-- Structure-specific elements rendered here -->
-                    <div class="empty-state" id="emptyState">
-                        <div class="empty-icon">📦</div>
-                        <p class="empty-title">Structure is empty</p>
-                        <p class="empty-hint">Add elements to see them visualized here</p>
-                    </div>
-                </div>
+            <div class="compOp">
+                <span class="compName">Sea</span>
+                <div class="compBar" data-value="3"></div>
             </div>
-
-            <!-- Control Panel -->
-            <div class="control-panel">
-                <div class="control-input-group">
-                    <input type="text" class="control-input" id="valueInput" placeholder="Enter value..." maxlength="4">
-                    <select class="control-select" id="operationSelect">
-                        <option value="insert">Insert</option>
-                        <option value="insertAt">Insert At</option>
-                        <option value="delete">Delete</option>
-                        <option value="deleteAt">Delete At</option>
-                        <option value="search">Search</option>
-                        <option value="update">Update</option>
-                    </select>
-                    <input type="number" class="control-input index-input" id="indexInput" placeholder="Index" min="0" style="display:none">
-                </div>
-                <div class="control-buttons">
-                    <button class="btn btn-primary" id="executeBtn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="5 3 19 12 5 21 5 3"/>
-                        </svg>
-                        Execute
-                    </button>
-                    <button class="btn btn-secondary" id="randomBtn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
-                            <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
-                        </svg>
-                        Random
-                    </button>
-                    <button class="btn btn-danger" id="clearBtn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        </svg>
-                        Clear
-                    </button>
-                    <button class="btn btn-step" id="stepBtn" style="display:none">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
-                        </svg>
-                        Step
-                    </button>
-                </div>
+            <div class="compOp">
+                <span class="compName">Ins</span>
+                <div class="compBar" data-value="3"></div>
             </div>
-        </main>
-
-        <!-- Metrics Sidebar -->
-        <aside class="metrics-panel" id="metricsPanel">
-            <div class="metric-section">
-                <h3 class="metric-title">
-                    <span class="metric-icon">⏱</span>
-                    Time Complexity
-                </h3>
-                <div class="complexity-chart" id="complexityChart">
-                    <canvas id="timeChart"></canvas>
-                </div>
+            <div class="compOp">
+                <span class="compName">Del</span>
+                <div class="compBar" data-value="3"></div>
             </div>
-
-            <div class="metric-section">
-                <h3 class="metric-title">
-                    <span class="metric-icon">💾</span>
-                    Space Complexity
-                </h3>
-                <div class="space-complexity" id="spaceComplexity">
-                    <span class="complexity-badge">O(n)</span>
-                </div>
-            </div>
-
-            <div class="metric-section">
-                <h3 class="metric-title">
-                    <span class="metric-icon">📋</span>
-                    Operation Log
-                </h3>
-                <div class="operation-log" id="operationLog">
-                    <div class="log-entry log-info">
-                        <span class="log-time">Now</span>
-                        <span class="log-msg">Ready to visualize</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
+        </div>
+        <div id="spaceBadge">O(n)</div>
     </div>
 
-    <!-- Notification Toast -->
-    <div class="toast" id="toast"></div>
+    <!-- Toast -->
+    <div id="toast"></div>
 
-    <!-- Anime.js from CDN -->
+    <!-- Background Effects -->
+    <div id="bgGrid"></div>
+
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
-    <!-- Chart.js from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- App Scripts -->
     <script src="js/core/EventBus.js"></script>
     <script src="js/core/Animator.js"></script>
     <script src="js/core/SoundEngine.js"></script>
