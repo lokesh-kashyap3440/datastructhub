@@ -140,6 +140,19 @@ body {
     gap: 0;
 }
 
+/* Order assignments for responsive reordering */
+.sidebar {
+    order: 1;
+}
+
+.main-content {
+    order: 2;
+}
+
+.metrics-panel {
+    order: 3;
+}
+
 /* ---- Sidebar ---- */
 .sidebar {
     display: flex;
