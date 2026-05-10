@@ -19,3 +19,4 @@ Thumbs.db
 # Misc
 *.log
 .env
+.vercel

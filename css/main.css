@@ -89,6 +89,21 @@ body {
     overflow: hidden;
     height: 100vh;
     width: 100vw;
+    overscroll-behavior: none;
+}
+
+/* Allow scroll on mobile */
+@media (max-width: 768px) {
+    body {
+        overflow: auto;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .app-container {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
 }
 
 /* ---- Background Effects ---- */
