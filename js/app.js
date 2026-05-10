@@ -1,6 +1,6 @@
 /**
- * DataStructHub — Main Application
- * Orchestrates all data structure visualizations
+ * DataStructHub — Mobile-First App
+ * Linear layout: topBar → canvas → controls → tabBar
  */
 
 // ===== App State =====
@@ -9,45 +9,19 @@ const AppState = {
     structures: {},
     isAnimating: false,
     speed: 1,
-    soundEnabled: true,
-    operationLog: []
+    soundEnabled: true
 };
 
 // ===== DOM References =====
-const DOM = {
-    navList: null,
-    structureTitle: null,
-    structureDesc: null,
-    statSize: null,
-    statCapacity: null,
-    visualization: null,
-    emptyState: null,
-    valueInput: null,
-    operationSelect: null,
-    indexInput: null,
-    executeBtn: null,
-    randomBtn: null,
-    clearBtn: null,
-    stepBtn: null,
-    speedSlider: null,
-    speedValue: null,
-    soundToggle: null,
-    soundOnIcon: null,
-    soundOffIcon: null,
-    metricsPanel: null
-};
+const DOM = {};
 
 // ===== Initialize App =====
 document.addEventListener('DOMContentLoaded', () => {
     initDOMReferences();
     initEventListeners();
     initStructures();
-    initChart();
-
-    // Select default structure (array)
     switchStructure('array');
 
-    // Initialize sound engine (requires user interaction)
     document.addEventListener('click', () => {
         soundEngine.init();
     }, { once: true });
@@ -55,9 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== Initialize DOM References =====
 function initDOMReferences() {
-    DOM.navList = document.getElementById('navList');
+    DOM.tabBar = document.getElementById('tabBar');
     DOM.structureTitle = document.getElementById('structureTitle');
-    DOM.structureDesc = document.getElementById('structureDesc');
     DOM.statSize = document.getElementById('statSize');
     DOM.statCapacity = document.getElementById('statCapacity');
     DOM.visualization = document.getElementById('visualization');
@@ -68,31 +41,25 @@ function initDOMReferences() {
     DOM.executeBtn = document.getElementById('executeBtn');
     DOM.randomBtn = document.getElementById('randomBtn');
     DOM.clearBtn = document.getElementById('clearBtn');
-    DOM.stepBtn = document.getElementById('stepBtn');
-    DOM.speedSlider = document.getElementById('speedSlider');
-    DOM.speedValue = document.getElementById('speedValue');
-    DOM.soundToggle = document.getElementById('soundToggle');
-    DOM.soundOnIcon = document.getElementById('soundOnIcon');
-    DOM.soundOffIcon = document.getElementById('soundOffIcon');
-    DOM.metricsPanel = document.getElementById('metricsPanel');
+    DOM.soundBtn = document.getElementById('soundBtn');
+    DOM.complexityBar = document.getElementById('complexityBar');
+    DOM.spaceBadge = document.getElementById('spaceBadge');
+    DOM.compBars = document.getElementById('compBars');
+    DOM.toast = document.getElementById('toast');
 }
 
 // ===== Initialize Event Listeners =====
 function initEventListeners() {
-    // Navigation
-    DOM.navList.addEventListener('click', (e) => {
-        const navItem = e.target.closest('.nav-item');
-        if (navItem) {
-            const structure = navItem.dataset.structure;
-            switchStructure(structure);
+    // Tab bar navigation
+    DOM.tabBar.addEventListener('click', (e) => {
+        const tab = e.target.closest('.tab');
+        if (tab) {
+            switchStructure(tab.dataset.structure);
         }
     });
 
     // Operation select change
-    DOM.operationSelect.addEventListener('change', () => {
-        updateOperationUI();
-        soundEngine.playClick();
-    });
+    DOM.operationSelect.addEventListener('change', updateOperationUI);
 
     // Execute button
     DOM.executeBtn.addEventListener('click', executeOperation);
@@ -103,46 +70,25 @@ function initEventListeners() {
     // Clear button
     DOM.clearBtn.addEventListener('click', clearStructure);
 
-    // Speed slider
-    DOM.speedSlider.addEventListener('input', () => {
-        const speed = parseFloat(DOM.speedSlider.value);
-        AppState.speed = speed;
-        DOM.speedValue.textContent = `${speed}x`;
-        animator.setSpeed(speed);
-    });
-
     // Sound toggle
-    DOM.soundToggle.addEventListener('click', () => {
+    DOM.soundBtn.addEventListener('click', () => {
         AppState.soundEnabled = soundEngine.toggle();
-        DOM.soundOnIcon.style.display = AppState.soundEnabled ? 'block' : 'none';
-        DOM.soundOffIcon.style.display = AppState.soundEnabled ? 'none' : 'block';
-        DOM.soundToggle.classList.toggle('muted', !AppState.soundEnabled);
+        DOM.soundBtn.textContent = AppState.soundEnabled ? '🔊' : '🔇';
+        DOM.soundBtn.classList.toggle('muted', !AppState.soundEnabled);
         soundEngine.playToggle();
     });
 
-    // Enter key on input
+    // Enter key on inputs
     DOM.valueInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            executeOperation();
-        }
+        if (e.key === 'Enter') executeOperation();
     });
-
-    // Index input enter key
     DOM.indexInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            executeOperation();
-        }
+        if (e.key === 'Enter') executeOperation();
     });
-
-    // Event bus listeners
-    eventBus.on('structure:update', updateStats);
-    eventBus.on('structure:operation', onOperation);
-    eventBus.on('structure:error', onError);
 }
 
 // ===== Initialize Data Structures =====
 function initStructures() {
-    // Register all structures
     AppState.structures = {
         array: new ArrayDS(),
         linkedlist: new LinkedList(),
@@ -153,48 +99,28 @@ function initStructures() {
         graph: new Graph(),
         heap: new Heap()
     };
-
-    // Initialize each structure
     Object.values(AppState.structures).forEach(ds => ds.init());
-}
-
-// ===== Initialize Chart =====
-function initChart() {
-    chartManager.init('timeChart');
-    updateComplexityChart('array');
 }
 
 // ===== Switch Structure =====
 function switchStructure(structureId) {
     if (AppState.isAnimating) {
-        showToast('Wait for current animation to complete', 'warning');
+        showToast('Wait for animation to finish', 'warning');
         return;
     }
 
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => item.classList.remove('active'));
-    
-    const activeItem = document.querySelector(`[data-structure="${structureId}"]`);
-    if (activeItem) activeItem.classList.add('active');
+    // Update tab active state
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-structure="${structureId}"]`)?.classList.add('active');
 
-    // Update CSS variable for active color
+    // Set active color
     const color = CONFIG.colors[structureId] || '#00e5ff';
     document.documentElement.style.setProperty('--active-color', color);
-    document.documentElement.style.setProperty('--accent', color);
-    document.documentElement.style.setProperty('--accent-soft', `${color}1a`);
-    document.documentElement.style.setProperty('--accent-hover', `${color}33`);
-    document.documentElement.style.setProperty('--glow-color', `${color}26`);
 
-    // Update button colors
-    document.querySelectorAll('.btn-primary').forEach(btn => {
-        btn.style.background = color;
-    });
-
-    // Update structure info
+    // Update title
     const meta = CONFIG.structures[structureId] || {};
     DOM.structureTitle.textContent = meta.name || structureId;
     DOM.structureTitle.style.color = color;
-    DOM.structureDesc.textContent = meta.desc || '';
 
     // Update capacity
     DOM.statCapacity.textContent = meta.maxCapacity || '—';
@@ -203,8 +129,33 @@ function switchStructure(structureId) {
     updateOperationOptions(structureId);
     updateOperationUI();
 
-    // Clear visualization and render new structure
-    clearVisualization();
+    // Update execute button color
+    DOM.executeBtn.style.background = color;
+    DOM.executeBtn.style.boxShadow = `0 0 20px ${color}33`;
+
+    // Update complexity bars
+    updateComplexityBars(structureId);
+
+    // Update space complexity
+    const complexity = CONFIG.complexity[structureId];
+    if (complexity && DOM.spaceBadge) {
+        DOM.spaceBadge.textContent = complexity.space;
+        DOM.spaceBadge.style.color = color;
+        DOM.spaceBadge.style.background = `${color}1a`;
+        DOM.spaceBadge.style.borderColor = `${color}33`;
+    }
+
+    // Clear and render
+    DOM.visualization.innerHTML = '';
+    if (DOM.emptyState) {
+        DOM.visualization.innerHTML = `
+            <div id="emptyState">
+                <div class="emptyIcon">📦</div>
+                <div class="emptyTitle">Structure is empty</div>
+                <div class="emptyHint">Add elements to visualize</div>
+            </div>
+        `;
+    }
 
     const ds = AppState.structures[structureId];
     if (ds) {
@@ -212,24 +163,7 @@ function switchStructure(structureId) {
         updateStats();
     }
 
-    // Update chart
-    updateComplexityChart(structureId);
-
-    // Update space complexity
-    const complexity = CONFIG.complexity[structureId];
-    const spaceBadge = document.querySelector('.complexity-badge');
-    if (spaceBadge && complexity) {
-        spaceBadge.textContent = complexity.space;
-        spaceBadge.style.color = color;
-        spaceBadge.style.borderColor = `${color}33`;
-        spaceBadge.style.background = `${color}1a`;
-    }
-
     AppState.currentStructure = structureId;
-
-    // Log
-    addLogEntry(`Switched to ${meta.name}`, 'info');
-
     soundEngine.playClick();
 }
 
@@ -241,19 +175,19 @@ function updateOperationOptions(structureId) {
     const operations = {
         array: [
             { value: 'insert', label: 'Insert' },
-            { value: 'insertAt', label: 'Insert At Index' },
-            { value: 'delete', label: 'Delete (by value)' },
-            { value: 'deleteAt', label: 'Delete At Index' },
+            { value: 'insertAt', label: 'Insert At' },
+            { value: 'delete', label: 'Delete' },
+            { value: 'deleteAt', label: 'Delete At' },
             { value: 'search', label: 'Search' },
-            { value: 'update', label: 'Update Index' }
+            { value: 'update', label: 'Update' }
         ],
         linkedlist: [
-            { value: 'insertHead', label: 'Insert at Head' },
-            { value: 'insertTail', label: 'Insert at Tail' },
-            { value: 'insertAt', label: 'Insert At Index' },
-            { value: 'deleteHead', label: 'Delete at Head' },
-            { value: 'deleteTail', label: 'Delete at Tail' },
-            { value: 'deleteAt', label: 'Delete At Index' },
+            { value: 'insertHead', label: 'Insert Head' },
+            { value: 'insertTail', label: 'Insert Tail' },
+            { value: 'insertAt', label: 'Insert At' },
+            { value: 'deleteHead', label: 'Delete Head' },
+            { value: 'deleteTail', label: 'Delete Tail' },
+            { value: 'deleteAt', label: 'Delete At' },
             { value: 'search', label: 'Search' }
         ],
         stack: [
@@ -270,21 +204,20 @@ function updateOperationOptions(structureId) {
             { value: 'insert', label: 'Insert' },
             { value: 'search', label: 'Search' },
             { value: 'delete', label: 'Delete' },
-            { value: 'traverseIn', label: 'Inorder Traversal' },
-            { value: 'traversePre', label: 'Preorder Traversal' },
-            { value: 'traversePost', label: 'Postorder Traversal' }
+            { value: 'traverseIn', label: 'Inorder' },
+            { value: 'traversePre', label: 'Preorder' },
+            { value: 'traversePost', label: 'Postorder' }
         ],
         hashtable: [
-            { value: 'insert', label: 'Insert (key:value)' },
+            { value: 'insert', label: 'Insert' },
             { value: 'search', label: 'Search' },
             { value: 'delete', label: 'Delete' }
         ],
         graph: [
             { value: 'addNode', label: 'Add Node' },
             { value: 'addEdge', label: 'Add Edge' },
-            { value: 'removeNode', label: 'Remove Node' },
-            { value: 'bfs', label: 'BFS Traversal' },
-            { value: 'dfs', label: 'DFS Traversal' }
+            { value: 'bfs', label: 'BFS' },
+            { value: 'dfs', label: 'DFS' }
         ],
         heap: [
             { value: 'insert', label: 'Insert' },
@@ -295,28 +228,25 @@ function updateOperationOptions(structureId) {
 
     const ops = operations[structureId] || [];
     ops.forEach(op => {
-        const option = document.createElement('option');
-        option.value = op.value;
-        option.textContent = op.label;
-        select.appendChild(option);
+        const opt = document.createElement('option');
+        opt.value = op.value;
+        opt.textContent = op.label;
+        select.appendChild(opt);
     });
 }
 
 // ===== Update Operation UI =====
 function updateOperationUI() {
-    const operation = DOM.operationSelect.value;
-    const needsIndex = ['insertAt', 'deleteAt', 'update'].includes(operation);
-    const needsKey = operation === 'insert' && AppState.currentStructure === 'hashtable';
-    const needsTwoValues = operation === 'addEdge';
-
+    const op = DOM.operationSelect.value;
+    const needsIndex = ['insertAt', 'deleteAt', 'update'].includes(op);
     DOM.indexInput.style.display = needsIndex ? 'block' : 'none';
 
-    if (needsKey) {
+    if (AppState.currentStructure === 'hashtable') {
         DOM.valueInput.placeholder = 'key:value';
-    } else if (needsTwoValues) {
-        DOM.valueInput.placeholder = 'from → to';
+    } else if (op === 'addEdge') {
+        DOM.valueInput.placeholder = 'A-B';
     } else {
-        DOM.valueInput.placeholder = 'Enter value...';
+        DOM.valueInput.placeholder = 'Value';
     }
 }
 
@@ -332,41 +262,33 @@ async function executeOperation() {
     const index = parseInt(DOM.indexInput.value) || 0;
 
     // Validate
-    if (!value && !['pop', 'dequeue', 'peek', 'front', 'extract', 'traverseIn', 'traversePre', 'traversePost', 'bfs', 'dfs', 'heapify'].includes(operation)) {
-        showToast('Please enter a value', 'error');
+    if (!value && !['pop', 'dequeue', 'peek', 'front', 'extract',
+                      'traverseIn', 'traversePre', 'traversePost',
+                      'bfs', 'dfs', 'heapify', 'deleteHead', 'deleteTail'].includes(operation)) {
+        showToast('Enter a value', 'error');
         DOM.valueInput.focus();
         return;
     }
 
-    // For graph edge, parse "from-to" format
+    // Parse edge format (A-B)
     if (operation === 'addEdge') {
         const parts = value.split('-').map(v => v.trim());
         if (parts.length !== 2) {
-            showToast('Use format: node1-node2 (e.g., A-B)', 'error');
+            showToast('Use format: A-B', 'error');
             return;
         }
         value = parts;
     }
 
-    // For hash table insert, parse "key:value" format
+    // Parse hash table key:value
     if (operation === 'insert' && AppState.currentStructure === 'hashtable' && value.includes(':')) {
         const [key, val] = value.split(':').map(v => v.trim());
         if (!key || !val) {
-            showToast('Use format: key:value (e.g., name:Alice)', 'error');
+            showToast('Use format: key:value', 'error');
             return;
         }
         value = { key, value: val };
     }
-
-    // Highlight chart for operation
-    const operationIndexMap = {
-        'insert': 2, 'insertAt': 2, 'insertHead': 2, 'insertTail': 2, 'push': 2, 'enqueue': 2,
-        'delete': 3, 'deleteAt': 3, 'deleteHead': 3, 'deleteTail': 3, 'pop': 3, 'dequeue': 3,
-        'search': 1, 'bfs': 1, 'dfs': 1, 'traverseIn': 1, 'traversePre': 1, 'traversePost': 1,
-        'access': 0, 'update': 0, 'addNode': 2, 'removeNode': 3, 'addEdge': 2,
-        'peek': 1, 'front': 1, 'extract': 3, 'heapify': 2
-    };
-    const opIndex = operationIndexMap[operation] ?? 2;
 
     AppState.isAnimating = true;
     DOM.executeBtn.disabled = true;
@@ -380,28 +302,17 @@ async function executeOperation() {
     }
 
     try {
-        // Perform operation
         const result = await ds.execute(operation, value, index);
 
-        // Highlight chart
-        const color = CONFIG.colors[AppState.currentStructure] || '#00e5ff';
-        chartManager.highlightBar(opIndex, color);
-
-        // Show result toast
-        if (result !== undefined && result !== null) {
-            if (operation === 'search' && result === null) {
-                showToast('Not found', 'warning');
-            } else if (result !== false) {
-                showToast(typeof result === 'string' ? result : `Done: ${result}`, 'success');
-            }
+        if (operation === 'search' && result === null) {
+            showToast('Not found', 'warning');
+        } else if (result !== false && result !== undefined) {
+            showToast(typeof result === 'string' ? result : `Done: ${result}`, 'success');
         }
 
-        // Re-render
         ds.render(DOM.visualization);
         updateStats();
-
     } catch (err) {
-        console.error('Operation error:', err);
         showToast(err.message || 'Operation failed', 'error');
         soundEngine.playError();
     }
@@ -423,73 +334,38 @@ async function randomizeStructure() {
     const ds = AppState.structures[AppState.currentStructure];
     if (!ds) return;
 
-    // Clear first
     ds.clear();
     ds.render(DOM.visualization);
 
-    // Add random elements
-    const count = randomInt(5, 8);
-    const operations = [];
+    const count = randomInt(5, 7);
 
-    switch (AppState.currentStructure) {
-        case 'array':
-            for (let i = 0; i < count; i++) {
-                operations.push(ds.insert(randomValue()));
-            }
-            break;
-        case 'linkedlist':
-            for (let i = 0; i < count; i++) {
-                operations.push(i % 2 === 0 ? ds.insertHead(randomValue()) : ds.insertTail(randomValue()));
-            }
-            break;
-        case 'stack':
-            for (let i = 0; i < count; i++) {
-                operations.push(ds.push(randomValue()));
-            }
-            break;
-        case 'queue':
-            for (let i = 0; i < count; i++) {
-                operations.push(ds.enqueue(randomValue()));
-            }
-            break;
-        case 'bst':
-            for (let i = 0; i < count; i++) {
-                operations.push(ds.insert(randomValue()));
-            }
-            break;
-        case 'hashtable':
-            for (let i = 0; i < count; i++) {
-                operations.push(ds.insert(`key${i}`, randomValue()));
-            }
-            break;
-        case 'graph':
-            const nodes = 'ABCDEFGHIJ'.split('').slice(0, count);
-            for (const node of nodes) {
-                operations.push(ds.addNode(node));
-            }
-            // Add random edges
-            for (let i = 0; i < count - 1; i++) {
-                const from = nodes[i];
-                const to = nodes[randomInt(i + 1, count - 1)];
-                operations.push(ds.addEdge(from, to));
-            }
-            break;
-        case 'heap':
-            for (let i = 0; i < count; i++) {
-                operations.push(ds.insert(randomValue()));
-            }
-            break;
-    }
-
-    // Execute all at once (no animation for batch)
-    for (const op of operations) {
-        await op;
+    for (let i = 0; i < count; i++) {
+        switch (AppState.currentStructure) {
+            case 'array': await ds.insert(randomValue()); break;
+            case 'linkedlist':
+                await (i % 2 === 0 ? ds.insertHead(randomValue()) : ds.insertTail(randomValue()));
+                break;
+            case 'stack':
+            case 'queue':
+            case 'heap':
+                await ds.insert(randomValue());
+                break;
+            case 'bst':
+                await ds.insert(randomValue());
+                break;
+            case 'hashtable':
+                await ds.insert(`k${i}`, randomValue());
+                break;
+            case 'graph':
+                await ds.addNode(String.fromCharCode(65 + i));
+                if (i > 0) await ds.addEdge(String.fromCharCode(64 + i), String.fromCharCode(65 + i));
+                break;
+        }
     }
 
     ds.render(DOM.visualization);
     updateStats();
-    addLogEntry(`Generated ${count} random elements`, 'info');
-    showToast(`${count} random elements added`, 'success');
+    showToast(`${count} elements added`, 'success');
 }
 
 // ===== Clear Structure =====
@@ -502,23 +378,8 @@ function clearStructure() {
     ds.clear();
     ds.render(DOM.visualization);
     updateStats();
-    addLogEntry('Structure cleared', 'info');
-    showToast('Structure cleared', 'success');
+    showToast('Cleared', 'success');
     soundEngine.playClick();
-}
-
-// ===== Clear Visualization =====
-function clearVisualization() {
-    DOM.visualization.innerHTML = '';
-    const emptyState = document.createElement('div');
-    emptyState.className = 'empty-state';
-    emptyState.id = 'emptyState';
-    emptyState.innerHTML = `
-        <div class="empty-icon">📦</div>
-        <p class="empty-title">Structure is empty</p>
-        <p class="empty-hint">Add elements to see them visualized here</p>
-    `;
-    DOM.visualization.appendChild(emptyState);
 }
 
 // ===== Update Stats =====
@@ -526,64 +387,55 @@ function updateStats() {
     const ds = AppState.structures[AppState.currentStructure];
     if (!ds) return;
 
-    const size = ds.size ? ds.size() : (ds.data ? ds.data.length : 0);
+    const size = ds.size ? ds.size() : (ds.data ? ds.data.length : (ds.heap ? ds.heap.length : 0));
     DOM.statSize.textContent = size;
-
-    const meta = CONFIG.structures[AppState.currentStructure];
-    DOM.statCapacity.textContent = meta?.maxCapacity || '—';
 }
 
-// ===== Update Complexity Chart =====
-function updateComplexityChart(structureId) {
+// ===== Update Complexity Bars =====
+function updateComplexityBars(structureId) {
     const complexity = CONFIG.complexity[structureId];
-    if (!complexity) return;
+    if (!complexity || !DOM.compBars) return;
 
     const color = CONFIG.colors[structureId] || '#00e5ff';
 
-    chartManager.update({
-        access: complexity.access,
-        search: complexity.search,
-        insert: complexity.insert,
-        delete: complexity.delete
-    }, color);
+    const ops = [
+        { name: 'Acc', value: complexity.accessVal || 0 },
+        { name: 'Sea', value: complexity.searchVal || 0 },
+        { name: 'Ins', value: complexity.insertVal || 0 },
+        { name: 'Del', value: complexity.deleteVal || 0 }
+    ];
+
+    DOM.compBars.innerHTML = ops.map(op => `
+        <div class="compOp">
+            <span class="compName">${op.name}</span>
+            <div class="compBar" data-value="${op.value}" style="--bar-color:${color}"></div>
+        </div>
+    `).join('');
+
+    // Apply color via CSS
+    DOM.compBars.querySelectorAll('.compBar').forEach(bar => {
+        bar.style.setProperty('--active-color', color);
+    });
 }
 
-// ===== On Operation Event =====
-function onOperation(data) {
-    const { operation, success } = data;
-    const msg = success
-        ? `${operation} completed successfully`
-        : `${operation} failed`;
-    const type = success ? 'success' : 'error';
-    addLogEntry(msg, type);
+// ===== Show Toast =====
+function showToast(message, type = '') {
+    const toast = DOM.toast;
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.className = '';
+    if (type) toast.classList.add(type);
+
+    // Force reflow
+    toast.offsetHeight;
+    toast.classList.add('show');
+
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2500);
 }
 
-// ===== On Error Event =====
-function onError(data) {
-    const { message } = data;
-    showToast(message, 'error');
-    addLogEntry(message, 'error');
-}
-
-// ===== Add Log Entry =====
-function addLogEntry(message, type = 'info') {
-    const log = document.getElementById('operationLog');
-    if (!log) return;
-
-    const entry = document.createElement('div');
-    entry.className = `log-entry log-${type}`;
-    entry.innerHTML = `
-        <span class="log-time">${formatTime()}</span>
-        <span class="log-msg">${escapeHtml(message)}</span>
-    `;
-
-    log.insertBefore(entry, log.firstChild);
-
-    // Keep only last 20 entries
-    while (log.children.length > 20) {
-        log.removeChild(log.lastChild);
-    }
-}
-
-// Expose AppState globally
+// Expose globally
 window.AppState = AppState;

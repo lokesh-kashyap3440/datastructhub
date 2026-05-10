@@ -176,10 +176,7 @@ class LinkedList {
         this.container = container;
         container.innerHTML = '';
 
-        if (this.isEmpty()) {
-            this.showEmptyState(container);
-            return;
-        }
+        if (this.isEmpty()) return;
 
         const listContainer = document.createElement('div');
         listContainer.className = 'linked-list-container';

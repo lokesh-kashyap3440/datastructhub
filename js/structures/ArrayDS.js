@@ -8,50 +8,30 @@ class ArrayDS {
         this.container = null;
     }
 
-    init() {
-        this.data = [];
-    }
+    init() { this.data = []; }
 
-    size() {
-        return this.data.length;
-    }
-
-    isEmpty() {
-        return this.data.length === 0;
-    }
-
-    isFull() {
-        return this.data.length >= this.maxCapacity;
-    }
+    size() { return this.data.length; }
+    isEmpty() { return this.data.length === 0; }
+    isFull() { return this.data.length >= this.maxCapacity; }
 
     async insert(value) {
-        if (this.isFull()) {
-            throw new Error('Array is full');
-        }
+        if (this.isFull()) throw new Error('Array is full');
         const numValue = parseInt(value) || randomValue();
         this.data.push(numValue);
         soundEngine.playInsert();
         await this.animateInsert(this.data.length - 1);
-        return `Inserted ${numValue} at index ${this.data.length - 1}`;
+        return `Inserted ${numValue}`;
     }
 
     async insertAt(value, index) {
-        if (this.isFull()) {
-            throw new Error('Array is full');
-        }
+        if (this.isFull()) throw new Error('Array is full');
         const idx = parseInt(index);
-        if (idx < 0 || idx > this.data.length) {
-            throw new Error('Invalid index');
-        }
+        if (idx < 0 || idx > this.data.length) throw new Error('Invalid index');
         const numValue = parseInt(value) || randomValue();
-
-        // Animate shift right
-        await this.animateShiftRight(idx);
-
         this.data.splice(idx, 0, numValue);
         soundEngine.playInsert(1.2);
         await this.animateInsert(idx);
-        return `Inserted ${numValue} at index ${idx}`;
+        return `Inserted ${numValue} at [${idx}]`;
     }
 
     async delete(value) {
@@ -61,7 +41,6 @@ class ArrayDS {
             soundEngine.playSearchMiss();
             throw new Error(`Value ${numValue} not found`);
         }
-
         await this.animateSearch(index, true);
         soundEngine.playDelete();
         await this.animateDelete(index);
@@ -71,16 +50,13 @@ class ArrayDS {
 
     async deleteAt(index) {
         const idx = parseInt(index);
-        if (idx < 0 || idx >= this.data.length) {
-            throw new Error('Invalid index');
-        }
-
+        if (idx < 0 || idx >= this.data.length) throw new Error('Invalid index');
         await this.animateSearch(idx, true);
         const value = this.data[idx];
         soundEngine.playDelete();
         await this.animateDelete(idx);
         this.data.splice(idx, 1);
-        return `Deleted at index ${idx}`;
+        return `Deleted at [${idx}]`;
     }
 
     async search(value) {
@@ -88,7 +64,6 @@ class ArrayDS {
         const index = this.data.indexOf(numValue);
 
         if (index === -1) {
-            // Scan animation
             await this.animateScan();
             soundEngine.playSearchMiss();
             return null;
@@ -96,36 +71,28 @@ class ArrayDS {
 
         await this.animateSearch(index, false);
         soundEngine.playSearchHit();
-        return `Found ${numValue} at index ${index}`;
+        return `Found ${numValue} at [${index}]`;
     }
 
     async update(index, newValue) {
         const idx = parseInt(index);
-        if (idx < 0 || idx >= this.data.length) {
-            throw new Error('Invalid index');
-        }
+        if (idx < 0 || idx >= this.data.length) throw new Error('Invalid index');
         const newVal = parseInt(newValue) || randomValue();
         const oldVal = this.data[idx];
-
         await this.animateSearch(idx, true);
         this.data[idx] = newVal;
         soundEngine.playInsert(0.8);
-        await this.animateUpdateValue(idx, oldVal, newVal);
-        return `Updated index ${idx}: ${oldVal} → ${newVal}`;
+        await this.animateUpdateValue(idx, newVal);
+        return `${oldVal} → ${newVal}`;
     }
 
-    clear() {
-        this.data = [];
-    }
+    clear() { this.data = []; }
 
     render(container) {
         this.container = container;
         container.innerHTML = '';
 
-        if (this.data.length === 0) {
-            this.showEmptyState(container);
-            return;
-        }
+        if (this.data.length === 0) return;
 
         const grid = document.createElement('div');
         grid.className = 'array-grid';
@@ -133,32 +100,16 @@ class ArrayDS {
         this.data.forEach((value, index) => {
             const cell = document.createElement('div');
             cell.className = 'array-cell';
-            cell.style.animationDelay = `${index * 50}ms`;
+            cell.style.animationDelay = `${index * 40}ms`;
             cell.innerHTML = `
                 <div class="array-value" data-index="${index}">${value}</div>
                 <span class="array-index">[${index}]</span>
             `;
-            cell.addEventListener('click', () => {
-                soundEngine.playClick();
-            });
             grid.appendChild(cell);
         });
 
         container.appendChild(grid);
-
-        // Animate entrance
-        const cells = grid.querySelectorAll('.array-cell');
-        animator.stagger(cells, { delay: 40 });
-    }
-
-    showEmptyState(container) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">📦</div>
-                <p class="empty-title">Array is empty</p>
-                <p class="empty-hint">Enter a value and click Execute</p>
-            </div>
-        `;
+        animator.stagger(grid.querySelectorAll('.array-cell'), { delay: 40 });
     }
 
     async animateInsert(index) {
@@ -168,21 +119,6 @@ class ArrayDS {
             await sleep(animator.duration(500));
             cell.classList.remove('inserting');
         }
-    }
-
-    async animateShiftRight(fromIndex) {
-        const cells = this.container?.querySelectorAll('.array-cell');
-        if (!cells) return;
-
-        for (let i = this.data.length - 1; i >= fromIndex; i--) {
-            const cell = cells[i];
-            if (cell) {
-                cell.style.transform = 'translateX(-60px)';
-                cell.style.opacity = '0.5';
-            }
-        }
-
-        await sleep(animator.duration(300));
     }
 
     async animateDelete(index) {
@@ -222,18 +158,13 @@ class ArrayDS {
             await sleep(animator.duration(150));
             cell.classList.remove('searching');
         }
-
-        await sleep(animator.duration(200));
     }
 
-    async animateUpdateValue(index, oldVal, newVal) {
-        const cell = this.container?.querySelector(`[data-index="${index}"]`)?.closest('.array-cell');
-        if (cell) {
-            const valueEl = cell.querySelector('.array-value');
-            if (valueEl) {
-                valueEl.textContent = newVal;
-                animator.highlight(valueEl);
-            }
+    async animateUpdateValue(index, newVal) {
+        const valueEl = this.container?.querySelector(`[data-index="${index}"]`);
+        if (valueEl) {
+            valueEl.textContent = newVal;
+            animator.highlight(valueEl);
         }
     }
 
