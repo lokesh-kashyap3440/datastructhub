@@ -1,0 +1,251 @@
+/**
+ * ArrayDS — Dynamic Array with visualization
+ */
+class ArrayDS {
+    constructor() {
+        this.data = [];
+        this.maxCapacity = 12;
+        this.container = null;
+    }
+
+    init() {
+        this.data = [];
+    }
+
+    size() {
+        return this.data.length;
+    }
+
+    isEmpty() {
+        return this.data.length === 0;
+    }
+
+    isFull() {
+        return this.data.length >= this.maxCapacity;
+    }
+
+    async insert(value) {
+        if (this.isFull()) {
+            throw new Error('Array is full');
+        }
+        const numValue = parseInt(value) || randomValue();
+        this.data.push(numValue);
+        soundEngine.playInsert();
+        await this.animateInsert(this.data.length - 1);
+        return `Inserted ${numValue} at index ${this.data.length - 1}`;
+    }
+
+    async insertAt(value, index) {
+        if (this.isFull()) {
+            throw new Error('Array is full');
+        }
+        const idx = parseInt(index);
+        if (idx < 0 || idx > this.data.length) {
+            throw new Error('Invalid index');
+        }
+        const numValue = parseInt(value) || randomValue();
+
+        // Animate shift right
+        await this.animateShiftRight(idx);
+
+        this.data.splice(idx, 0, numValue);
+        soundEngine.playInsert(1.2);
+        await this.animateInsert(idx);
+        return `Inserted ${numValue} at index ${idx}`;
+    }
+
+    async delete(value) {
+        const numValue = parseInt(value);
+        const index = this.data.indexOf(numValue);
+        if (index === -1) {
+            soundEngine.playSearchMiss();
+            throw new Error(`Value ${numValue} not found`);
+        }
+
+        await this.animateSearch(index, true);
+        soundEngine.playDelete();
+        await this.animateDelete(index);
+        this.data.splice(index, 1);
+        return `Deleted ${numValue}`;
+    }
+
+    async deleteAt(index) {
+        const idx = parseInt(index);
+        if (idx < 0 || idx >= this.data.length) {
+            throw new Error('Invalid index');
+        }
+
+        await this.animateSearch(idx, true);
+        const value = this.data[idx];
+        soundEngine.playDelete();
+        await this.animateDelete(idx);
+        this.data.splice(idx, 1);
+        return `Deleted at index ${idx}`;
+    }
+
+    async search(value) {
+        const numValue = parseInt(value);
+        const index = this.data.indexOf(numValue);
+
+        if (index === -1) {
+            // Scan animation
+            await this.animateScan();
+            soundEngine.playSearchMiss();
+            return null;
+        }
+
+        await this.animateSearch(index, false);
+        soundEngine.playSearchHit();
+        return `Found ${numValue} at index ${index}`;
+    }
+
+    async update(index, newValue) {
+        const idx = parseInt(index);
+        if (idx < 0 || idx >= this.data.length) {
+            throw new Error('Invalid index');
+        }
+        const newVal = parseInt(newValue) || randomValue();
+        const oldVal = this.data[idx];
+
+        await this.animateSearch(idx, true);
+        this.data[idx] = newVal;
+        soundEngine.playInsert(0.8);
+        await this.animateUpdateValue(idx, oldVal, newVal);
+        return `Updated index ${idx}: ${oldVal} → ${newVal}`;
+    }
+
+    clear() {
+        this.data = [];
+    }
+
+    render(container) {
+        this.container = container;
+        container.innerHTML = '';
+
+        if (this.data.length === 0) {
+            this.showEmptyState(container);
+            return;
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'array-grid';
+
+        this.data.forEach((value, index) => {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.style.animationDelay = `${index * 50}ms`;
+            cell.innerHTML = `
+                <div class="array-value" data-index="${index}">${value}</div>
+                <span class="array-index">[${index}]</span>
+            `;
+            cell.addEventListener('click', () => {
+                soundEngine.playClick();
+            });
+            grid.appendChild(cell);
+        });
+
+        container.appendChild(grid);
+
+        // Animate entrance
+        const cells = grid.querySelectorAll('.array-cell');
+        animator.stagger(cells, { delay: 40 });
+    }
+
+    showEmptyState(container) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <p class="empty-title">Array is empty</p>
+                <p class="empty-hint">Enter a value and click Execute</p>
+            </div>
+        `;
+    }
+
+    async animateInsert(index) {
+        const cell = this.container?.querySelector(`[data-index="${index}"]`)?.closest('.array-cell');
+        if (cell) {
+            cell.classList.add('inserting');
+            await sleep(animator.duration(500));
+            cell.classList.remove('inserting');
+        }
+    }
+
+    async animateShiftRight(fromIndex) {
+        const cells = this.container?.querySelectorAll('.array-cell');
+        if (!cells) return;
+
+        for (let i = this.data.length - 1; i >= fromIndex; i--) {
+            const cell = cells[i];
+            if (cell) {
+                cell.style.transform = 'translateX(-60px)';
+                cell.style.opacity = '0.5';
+            }
+        }
+
+        await sleep(animator.duration(300));
+    }
+
+    async animateDelete(index) {
+        const cell = this.container?.querySelector(`[data-index="${index}"]`)?.closest('.array-cell');
+        if (cell) {
+            cell.classList.add('deleting');
+            await sleep(animator.duration(400));
+        }
+    }
+
+    async animateSearch(index, isDelete = false) {
+        const cells = this.container?.querySelectorAll('.array-cell');
+        if (!cells) return;
+
+        for (let i = 0; i <= index; i++) {
+            if (cells[i]) {
+                cells[i].classList.add('searching');
+                soundEngine.playStep(0.8 + i * 0.1);
+                await sleep(animator.duration(200));
+                cells[i].classList.remove('searching');
+            }
+        }
+
+        if (cells[index]) {
+            cells[index].classList.add(isDelete ? 'selected' : 'found');
+            await sleep(animator.duration(400));
+        }
+    }
+
+    async animateScan() {
+        const cells = this.container?.querySelectorAll('.array-cell');
+        if (!cells) return;
+
+        for (const cell of cells) {
+            cell.classList.add('searching');
+            soundEngine.playStep(0.6);
+            await sleep(animator.duration(150));
+            cell.classList.remove('searching');
+        }
+
+        await sleep(animator.duration(200));
+    }
+
+    async animateUpdateValue(index, oldVal, newVal) {
+        const cell = this.container?.querySelector(`[data-index="${index}"]`)?.closest('.array-cell');
+        if (cell) {
+            const valueEl = cell.querySelector('.array-value');
+            if (valueEl) {
+                valueEl.textContent = newVal;
+                animator.highlight(valueEl);
+            }
+        }
+    }
+
+    async execute(operation, value, index) {
+        switch (operation) {
+            case 'insert': return await this.insert(value);
+            case 'insertAt': return await this.insertAt(value, index);
+            case 'delete': return await this.delete(value);
+            case 'deleteAt': return await this.deleteAt(index);
+            case 'search': return await this.search(value);
+            case 'update': return await this.update(index, value);
+            default: throw new Error(`Unknown operation: ${operation}`);
+        }
+    }
+}

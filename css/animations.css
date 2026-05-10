@@ -1,0 +1,318 @@
+/* =========================================
+   DataStructHub — Animations
+   ========================================= */
+
+/* ---- Entrance Animations ---- */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ---- Node Animations ---- */
+@keyframes nodeAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(-10deg);
+    }
+    60% {
+        transform: scale(1.15) rotate(3deg);
+    }
+    80% {
+        transform: scale(0.92) rotate(-2deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes nodeRemove {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    40% {
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0) rotate(10deg);
+    }
+}
+
+@keyframes nodeHighlight {
+    0%, 100% {
+        box-shadow: 0 0 0 0 transparent;
+    }
+    50% {
+        box-shadow: 0 0 0 4px var(--active-color), 0 0 20px var(--active-color);
+    }
+}
+
+@keyframes nodePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+/* ---- Arrow/Edge Animations ---- */
+@keyframes drawLine {
+    from {
+        stroke-dashoffset: 100;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes arrowBounce {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(4px);
+    }
+}
+
+/* ---- Flow Animations ---- */
+@keyframes flowDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes flowUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes flowLeft {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes flowRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ---- Value Counter ---- */
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---- Search Highlight ---- */
+@keyframes searchScan {
+    0% {
+        background: transparent;
+    }
+    50% {
+        background: rgba(255, 215, 0, 0.3);
+    }
+    100% {
+        background: transparent;
+    }
+}
+
+/* ---- Success / Error Flash ---- */
+@keyframes successFlash {
+    0%, 100% {
+        background: transparent;
+    }
+    50% {
+        background: rgba(0, 255, 136, 0.2);
+    }
+}
+
+@keyframes errorFlash {
+    0%, 100% {
+        background: transparent;
+    }
+    50% {
+        background: rgba(255, 61, 113, 0.2);
+    }
+}
+
+/* ---- Tree Branch Grow ---- */
+@keyframes branchGrow {
+    from {
+        stroke-dashoffset: 100;
+        opacity: 0;
+    }
+    to {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+}
+
+/* ---- Glow Pulse ---- */
+@keyframes glowPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 4px var(--active-color));
+    }
+    50% {
+        filter: drop-shadow(0 0 12px var(--active-color));
+    }
+}
+
+/* ---- Float ---- */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+/* ---- Shimmer ---- */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* ---- Rotate ---- */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ---- Page Load Stagger ---- */
+.app-container > * {
+    animation: fadeInUp 400ms ease-out backwards;
+}
+
+.sidebar {
+    animation-delay: 0ms;
+}
+
+.main-content {
+    animation-delay: 80ms;
+}
+
+.metrics-panel {
+    animation-delay: 160ms;
+}
+
+/* ---- Active Node Glow ---- */
+.ds-node.searching {
+    animation: nodeHighlight 600ms ease-in-out infinite;
+}
+
+.ds-node.found {
+    animation: successFlash 500ms ease;
+}
+
+.ds-node.not-found {
+    animation: errorFlash 500ms ease;
+}
+
+/* ---- Floating Particle Background ---- */
+@keyframes particleFloat {
+    0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.5;
+    }
+    90% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(20px) scale(0.5);
+        opacity: 0;
+    }
+}
