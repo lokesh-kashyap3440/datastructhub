@@ -208,7 +208,7 @@ class Graph {
         container.innerHTML = '';
 
         if (this.nodes.size === 0) {
-            this.showEmptyState(container);
+            container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.5"><div style="font-size:36px">🔵</div><div style="font-size:15px;font-weight:600;color:#8888aa">Graph is empty</div><div style="font-size:12px;color:#55557a">Add nodes and connect them</div></div>';
             return;
         }
 

@@ -432,7 +432,7 @@ body {
     border: 1px solid var(--border-subtle);
     background: var(--bg-card);
     backdrop-filter: blur(8px);
-    overflow: hidden;
+    overflow: auto;
 }
 
 /* ---- Empty State ---- */

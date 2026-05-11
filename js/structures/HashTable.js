@@ -4,21 +4,21 @@
 class HashTable {
     constructor() {
         this.buckets = new Array(8).fill(null).map(() => []);
-        this.size = 0;
+        this._count = 0;
         this.container = null;
     }
 
     init() {
         this.buckets = new Array(8).fill(null).map(() => []);
-        this.size = 0;
+        this._count = 0;
     }
 
     size() {
-        return this.size;
+        return this._count;
     }
 
     isEmpty() {
-        return this.size === 0;
+        return this._count === 0;
     }
 
     _hash(key) {
@@ -31,7 +31,7 @@ class HashTable {
     }
 
     async insert(key, value) {
-        if (this.size >= 32) {
+        if (this._count >= 32) {
             throw new Error('Hash table is full');
         }
         if (!key) {
@@ -53,7 +53,7 @@ class HashTable {
 
         // Add new entry
         bucket.push({ key: String(key), value: String(value) });
-        this.size++;
+        this._count++;
 
         await this.animateHighlight(index);
         soundEngine.playInsert();
@@ -93,7 +93,7 @@ class HashTable {
         await sleep(animator.duration(300));
 
         bucket.splice(itemIndex, 1);
-        this.size--;
+        this._count--;
 
         soundEngine.playDelete();
         await this.animateDelete(index, itemIndex);
@@ -102,12 +102,17 @@ class HashTable {
 
     clear() {
         this.buckets = new Array(8).fill(null).map(() => []);
-        this.size = 0;
+        this._count = 0;
     }
 
     render(container) {
         this.container = container;
         container.innerHTML = '';
+
+        if (this.isEmpty()) {
+            container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.5"><div style="font-size:36px">🔐</div><div style="font-size:15px;font-weight:600;color:#8888aa">Hash table is empty</div><div style="font-size:12px;color:#55557a">Insert key:value pairs</div></div>';
+            return;
+        }
 
         const htContainer = document.createElement('div');
         htContainer.className = 'hashtable-container';

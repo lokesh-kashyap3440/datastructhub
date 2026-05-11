@@ -4,21 +4,21 @@
 class LinkedList {
     constructor() {
         this.head = null;
-        this.size = 0;
+        this._count = 0;
         this.container = null;
     }
 
     init() {
         this.head = null;
-        this.size = 0;
+        this._count = 0;
     }
 
     size() {
-        return this.size;
+        return this._count;
     }
 
     isEmpty() {
-        return this.size === 0;
+        return this._count === 0;
     }
 
     // Create a new node
@@ -30,13 +30,13 @@ class LinkedList {
     }
 
     async insertHead(value) {
-        if (this.size >= 20) {
+        if (this._count >= 20) {
             throw new Error('List is full');
         }
         const newNode = this.createNode(value);
         newNode.next = this.head;
         this.head = newNode;
-        this.size++;
+        this._count++;
 
         soundEngine.playInsert(1.5);
         await this.animateInsertHead();
@@ -44,7 +44,7 @@ class LinkedList {
     }
 
     async insertTail(value) {
-        if (this.size >= 20) {
+        if (this._count >= 20) {
             throw new Error('List is full');
         }
         const newNode = this.createNode(value);
@@ -58,7 +58,7 @@ class LinkedList {
             }
             current.next = newNode;
         }
-        this.size++;
+        this._count++;
 
         soundEngine.playInsert(1.0);
         await this.animateInsertTail();
@@ -66,11 +66,11 @@ class LinkedList {
     }
 
     async insertAt(value, index) {
-        if (index < 0 || index > this.size) {
+        if (index < 0 || index > this._count) {
             throw new Error('Invalid index');
         }
         if (index === 0) return await this.insertHead(value);
-        if (index === this.size) return await this.insertTail(value);
+        if (index === this._count) return await this.insertTail(value);
 
         const newNode = this.createNode(value);
         let current = this.head;
@@ -79,7 +79,7 @@ class LinkedList {
         }
         newNode.next = current.next;
         current.next = newNode;
-        this.size++;
+        this._count++;
 
         soundEngine.playInsert(1.2);
         await this.animateInsertAt(index);
@@ -94,7 +94,7 @@ class LinkedList {
         soundEngine.playDelete();
         await this.animateDeleteHead();
         this.head = this.head.next;
-        this.size--;
+        this._count--;
         return `Deleted head: ${value}`;
     }
 
@@ -114,12 +114,12 @@ class LinkedList {
         soundEngine.playDelete();
         await this.animateDeleteTail();
         current.next = null;
-        this.size--;
+        this._count--;
         return `Deleted tail: ${value}`;
     }
 
     async deleteAt(index) {
-        if (index < 0 || index >= this.size) {
+        if (index < 0 || index >= this._count) {
             throw new Error('Invalid index');
         }
         if (index === 0) return await this.deleteHead();
@@ -132,7 +132,7 @@ class LinkedList {
         soundEngine.playDelete();
         await this.animateDeleteAt(index);
         current.next = current.next.next;
-        this.size--;
+        this._count--;
         return `Deleted at index ${index}: ${value}`;
     }
 
@@ -158,7 +158,7 @@ class LinkedList {
 
     clear() {
         this.head = null;
-        this.size = 0;
+        this._count = 0;
     }
 
     // Traverse and return array
@@ -176,7 +176,10 @@ class LinkedList {
         this.container = container;
         container.innerHTML = '';
 
-        if (this.isEmpty()) return;
+        if (this.isEmpty()) {
+            container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.5"><div style="font-size:36px">🔗</div><div style="font-size:15px;font-weight:600;color:#8888aa">List is empty</div><div style="font-size:12px;color:#55557a">Insert nodes to see the chain</div></div>';
+            return;
+        }
 
         const listContainer = document.createElement('div');
         listContainer.className = 'linked-list-container';

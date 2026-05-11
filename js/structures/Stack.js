@@ -65,8 +65,8 @@ class Stack {
         this.container = container;
         container.innerHTML = '';
 
-        if (this.items.length === 0) {
-            this.showEmptyState(container);
+        if (this.isEmpty()) {
+            container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.5"><div style="font-size:36px">📚</div><div style="font-size:15px;font-weight:600;color:#8888aa">Stack is empty</div><div style="font-size:12px;color:#55557a">Push elements to build the stack</div></div>';
             return;
         }
 

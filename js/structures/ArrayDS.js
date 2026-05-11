@@ -92,7 +92,10 @@ class ArrayDS {
         this.container = container;
         container.innerHTML = '';
 
-        if (this.data.length === 0) return;
+        if (this.data.length === 0) {
+            container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.5"><div style="font-size:36px">📦</div><div style="font-size:15px;font-weight:600;color:#8888aa">Array is empty</div><div style="font-size:12px;color:#55557a">Enter a value and Execute</div></div>';
+            return;
+        }
 
         const grid = document.createElement('div');
         grid.className = 'array-grid';

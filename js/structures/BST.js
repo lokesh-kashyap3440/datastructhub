@@ -240,31 +240,54 @@ class BST {
         container.innerHTML = '';
 
         if (!this.root) {
-            this.showEmptyState(container);
+            container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.5"><div style="font-size:36px">🌳</div><div style="font-size:15px;font-weight:600;color:#8888aa">Tree is empty</div><div style="font-size:12px;color:#55557a">Insert values to grow the tree</div></div>';
             return;
         }
 
         const wrapper = document.createElement('div');
         wrapper.className = 'bst-container';
 
+        // Calculate positions first, track bounds
+        const positions = new Map();
+        const depth = this._getTreeDepth(this.root);
+        const startSpread = Math.min(120 * Math.pow(2, depth), 600);
+        const startX = startSpread;
+        this._calculatePositions(this.root, null, null, positions, null, startX, 50, startSpread);
+
+        // Compute bounding box from actual node positions
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (const pos of positions.values()) {
+            minX = Math.min(minX, pos.x);
+            maxX = Math.max(maxX, pos.x);
+            minY = Math.min(minY, pos.y);
+            maxY = Math.max(maxY, pos.y);
+        }
+
+        const padding = this.nodeRadius + 20;
+        const viewX = minX - padding;
+        const viewY = minY - padding;
+        const viewW = (maxX - minX) + padding * 2;
+        const viewH = (maxY - minY) + padding * 2;
+
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('class', 'bst-svg');
         svg.setAttribute('width', '100%');
         svg.setAttribute('height', '100%');
-        svg.setAttribute('viewBox', '0 0 800 400');
+        svg.setAttribute('viewBox', `${viewX} ${viewY} ${viewW} ${viewH}`);
 
         wrapper.appendChild(svg);
         container.appendChild(wrapper);
-
-        // Calculate positions
-        const positions = new Map();
-        this._calculatePositions(this.root, null, null, positions, svg, 400, 40, 800);
 
         // Render edges first
         this._renderEdges(this.root, positions, svg);
 
         // Render nodes
         this._renderNodes(this.root, positions, svg);
+    }
+
+    _getTreeDepth(node) {
+        if (!node) return 0;
+        return 1 + Math.max(this._getTreeDepth(node.left), this._getTreeDepth(node.right));
     }
 
     _calculatePositions(node, parent, isLeft, positions, svg, x, y, spread) {

@@ -125,8 +125,9 @@ class Heap {
         this.container = container;
         container.innerHTML = '';
 
+
         if (this.heap.length === 0) {
-            this.showEmptyState(container);
+            container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.5"><div style="font-size:36px">🏔️</div><div style="font-size:15px;font-weight:600;color:#8888aa">Heap is empty</div><div style="font-size:12px;color:#55557a">Insert values to build the heap</div></div>';
             return;
         }
 
