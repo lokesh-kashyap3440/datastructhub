@@ -118,17 +118,16 @@ class ArrayDS {
     async animateInsert(index) {
         const cell = this.container?.querySelector(`[data-index="${index}"]`)?.closest('.array-cell');
         if (cell) {
-            cell.classList.add('inserting');
-            await sleep(animator.duration(500));
-            cell.classList.remove('inserting');
+            await animator.appear(cell, { duration: 500 });
+            await sleep(animator.duration(200));
         }
     }
 
     async animateDelete(index) {
         const cell = this.container?.querySelector(`[data-index="${index}"]`)?.closest('.array-cell');
         if (cell) {
-            cell.classList.add('deleting');
-            await sleep(animator.duration(400));
+            await animator.disappear(cell, null, { duration: 400 });
+            await sleep(animator.duration(50));
         }
     }
 
@@ -138,16 +137,21 @@ class ArrayDS {
 
         for (let i = 0; i <= index; i++) {
             if (cells[i]) {
-                cells[i].classList.add('searching');
+                const valueEl = cells[i].querySelector('.array-value');
+                if (valueEl) {
+                    anime({ targets: valueEl, scale: [1, 1.12, 1], borderColor: ['var(--active-color)', 'var(--warning)', 'var(--active-color)'], duration: animator.duration(300), easing: 'easeInOutQuad' });
+                }
                 soundEngine.playStep(0.8 + i * 0.1);
                 await sleep(animator.duration(200));
-                cells[i].classList.remove('searching');
             }
         }
 
         if (cells[index]) {
-            cells[index].classList.add(isDelete ? 'selected' : 'found');
-            await sleep(animator.duration(400));
+            const valueEl = cells[index].querySelector('.array-value');
+            if (valueEl) {
+                const color = isDelete ? 'var(--danger)' : 'var(--success)';
+                await anime({ targets: valueEl, scale: [1, 1.2, 1], borderColor: [color, color], boxShadow: isDelete ? `0 0 24px rgba(255,61,113,0.5)` : `0 0 24px rgba(0,255,136,0.5)`, duration: animator.duration(500), easing: 'easeOutElastic(1, 0.5)' }).finished;
+            }
         }
     }
 
@@ -156,18 +160,21 @@ class ArrayDS {
         if (!cells) return;
 
         for (const cell of cells) {
-            cell.classList.add('searching');
+            const valueEl = cell.querySelector('.array-value');
+            if (valueEl) {
+                anime({ targets: valueEl, scale: [1, 1.08, 1], duration: animator.duration(200), easing: 'easeInOutQuad' });
+            }
             soundEngine.playStep(0.6);
-            await sleep(animator.duration(150));
-            cell.classList.remove('searching');
+            await sleep(animator.duration(120));
         }
     }
 
     async animateUpdateValue(index, newVal) {
         const valueEl = this.container?.querySelector(`[data-index="${index}"]`);
         if (valueEl) {
+            await anime({ targets: valueEl, scale: [1, 1.3, 1], duration: animator.duration(400), easing: 'easeOutElastic(1, 0.5)' }).finished;
             valueEl.textContent = newVal;
-            animator.highlight(valueEl);
+            anime({ targets: valueEl, scale: [{ value: 1.3 }, { value: 1 }], boxShadow: [`0 0 30px var(--active-color)`, `none`], duration: animator.duration(400), easing: 'easeOutElastic(1, 0.5)' });
         }
     }
 

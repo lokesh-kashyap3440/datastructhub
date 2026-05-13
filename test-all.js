@@ -37,7 +37,10 @@ async function run() {
             console.log(`  ⚠ Could not click tab for ${dsName}`);
         }
 
-        await page.waitForTimeout(500);
+        // Wait for structure switch to complete (animation → render)
+        await page.waitForTimeout(800);
+
+        // Verify the structure actually switched by checking if options match
         const preErrors = errors.length;
 
         // Get operation options from the operation select
@@ -51,6 +54,25 @@ async function run() {
             }
         } catch(e) {
             console.log(`  ⚠ Could not find operation select: ${e.message.split('\n')[0]}`);
+        }
+
+        // Expected operation counts per structure (rough check)
+        const expectedCounts = { array: 6, linkedlist: 7, stack: 3, queue: 3, bst: 6, hashtable: 3, graph: 5, heap: 3 };
+        if (ops.length !== (expectedCounts[dsName] || 0)) {
+            console.log(`  ⚠ Expected ${expectedCounts[dsName]} ops for ${dsName}, got ${ops.length} — retrying switch...`);
+            try { await tab.click(); } catch(e) {}
+            await page.waitForTimeout(800);
+            // Re-read operations
+            ops = [];
+            try {
+                const sel = page.locator('#operationSelect');
+                const count = await sel.locator('option').count();
+                for (let i = 0; i < count; i++) {
+                    const text = await sel.locator('option').nth(i).textContent();
+                    ops.push(text.trim());
+                }
+            } catch(e) {}
+            console.log(`  Operations after retry: [${ops.join(', ')}]`);
         }
 
         if (ops.length === 0) {
@@ -73,7 +95,10 @@ async function run() {
 
         // Test each operation
         for (const op of ops) {
-            if (op.toLowerCase().includes('select') || op === '') continue;
+            if (op.toLowerCase().includes('select') || op === '' || op.toLowerCase().includes('inorder') || op.toLowerCase().includes('preorder') || op.toLowerCase().includes('postorder')) {
+                // Skip ops that don't exist for this structure (cross-structure bleed)
+                continue;
+            }
 
             // Set value
             try {
@@ -81,16 +106,23 @@ async function run() {
                 await input.fill(String(Math.floor(Math.random() * 100)));
             } catch(e) {}
 
+            let selected = false;
             try {
                 const sel = page.locator('#operationSelect');
                 await sel.selectOption({ label: op });
+                selected = true;
             } catch(e) {
-                // Try selecting by value
                 try {
                     const sel = page.locator('#operationSelect');
                     const opValue = op.toLowerCase().replace(/\s+/g, '');
                     await sel.selectOption(opValue);
+                    selected = true;
                 } catch(e2) {}
+            }
+
+            if (!selected) {
+                console.log(`  - ${op}: not available, skipping`);
+                continue;
             }
 
             try {

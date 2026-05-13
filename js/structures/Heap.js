@@ -224,12 +224,28 @@ class Heap {
         const nodes = this.container?.querySelectorAll('.heap-node');
         if (!nodes || !nodes[i] || !nodes[j]) return;
 
+        const circleI = nodes[i].querySelector('circle');
+        const circleJ = nodes[j].querySelector('circle');
+        if (circleI) {
+            anime({ targets: circleI, attr: { r: [this.nodeRadius, this.nodeRadius + 4, this.nodeRadius] }, fill: 'rgba(255,214,0,0.2)', stroke: 'var(--warning)', duration: animator.duration(300), easing: 'easeInOutQuad' });
+        }
+        if (circleJ) {
+            anime({ targets: circleJ, attr: { r: [this.nodeRadius, this.nodeRadius + 4, this.nodeRadius] }, fill: 'rgba(255,214,0,0.2)', stroke: 'var(--warning)', duration: animator.duration(300), easing: 'easeInOutQuad' });
+        }
+
         nodes[i].classList.add('highlight');
         nodes[j].classList.add('highlight');
         soundEngine.playStep(1.0 + i * 0.05);
         await sleep(animator.duration(400));
         nodes[i].classList.remove('highlight');
         nodes[j].classList.remove('highlight');
+
+        if (circleI) {
+            anime({ targets: circleI, fill: 'var(--bg-tertiary)', stroke: 'var(--active-color)', duration: animator.duration(200) });
+        }
+        if (circleJ) {
+            anime({ targets: circleJ, fill: 'var(--bg-tertiary)', stroke: 'var(--active-color)', duration: animator.duration(200) });
+        }
     }
 
     async animateSwap(i, j) {
@@ -243,13 +259,28 @@ class Heap {
             const transformI = nodeI.getAttribute('transform');
             const transformJ = nodeJ.getAttribute('transform');
 
+            // Extract x,y coordinates
+            const parseXY = (t) => {
+                const match = t.match(/translate\(([\d.]+),\s*([\d.]+)\)/);
+                return match ? { x: parseFloat(match[1]), y: parseFloat(match[2]) } : null;
+            };
+
+            const posI = parseXY(transformI);
+            const posJ = parseXY(transformJ);
+
+            if (posI && posJ) {
+                // Animate movement
+                anime({ targets: nodeI, translateX: [posI.x, posJ.x], translateY: [posI.y, posJ.y], duration: animator.duration(400), easing: 'easeInOutQuad' });
+                anime({ targets: nodeJ, translateX: [posJ.x, posI.x], translateY: [posJ.y, posI.y], duration: animator.duration(400), easing: 'easeInOutQuad' });
+                await sleep(animator.duration(50));
+            }
+
             nodeI.setAttribute('transform', transformJ);
             nodeJ.setAttribute('transform', transformI);
-
             nodeI.setAttribute('data-index', j);
             nodeJ.setAttribute('data-index', i);
 
-            await sleep(animator.duration(500));
+            await sleep(animator.duration(450));
         }
     }
 

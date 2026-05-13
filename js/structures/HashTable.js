@@ -185,6 +185,10 @@ class HashTable {
     async animateHighlight(bucketIndex) {
         const bucket = this.container?.querySelector(`[data-index="${bucketIndex}"]`);
         if (bucket) {
+            const label = bucket.querySelector('.ht-bucket-label');
+            if (label) {
+                anime({ targets: label, scale: [1, 1.15, 1], duration: animator.duration(500), easing: 'easeOutElastic(1, 0.5)' });
+            }
             bucket.classList.add('highlight');
             await sleep(animator.duration(500));
             bucket.classList.remove('highlight');
@@ -199,11 +203,11 @@ class HashTable {
         for (let i = 0; i < items.length; i++) {
             const valueEl = items[i].querySelector('.ht-value');
             if (valueEl) {
-                valueEl.style.transform = 'scale(1.1)';
-                soundEngine.playStep(1.0 + i * 0.1);
-                await sleep(animator.duration(250));
-                valueEl.style.transform = '';
+                const isMatch = valueEl.textContent.startsWith(targetKey);
+                anime({ targets: valueEl, scale: [1, 1.15, 1], borderColor: isMatch ? ['var(--active-color)', 'var(--success)', 'var(--active-color)'] : ['var(--active-color)', 'var(--warning)', 'var(--active-color)'], duration: animator.duration(250), easing: 'easeInOutQuad' });
             }
+            soundEngine.playStep(1.0 + i * 0.1);
+            await sleep(animator.duration(250));
         }
     }
 
@@ -215,11 +219,8 @@ class HashTable {
         if (items[itemIndex]) {
             const valueEl = items[itemIndex].querySelector('.ht-value');
             if (valueEl) {
-                valueEl.style.borderColor = 'var(--success)';
-                valueEl.style.boxShadow = '0 0 20px rgba(0, 255, 136, 0.4)';
-                await sleep(animator.duration(600));
-                valueEl.style.borderColor = '';
-                valueEl.style.boxShadow = '';
+                await anime({ targets: valueEl, scale: [1, 1.25, 1], borderColor: 'var(--success)', boxShadow: '0 0 30px rgba(0,255,136,0.6)', duration: animator.duration(600), easing: 'easeOutElastic(1, 0.5)' }).finished;
+                anime({ targets: valueEl, borderColor: 'var(--active-color)', boxShadow: '0 0 8px rgba(155,89,255,0.15)', duration: animator.duration(300), easing: 'easeOutQuad' });
             }
         }
     }
@@ -230,9 +231,7 @@ class HashTable {
 
         const items = bucket.querySelectorAll('.ht-item');
         if (items[itemIndex]) {
-            items[itemIndex].style.transform = 'scale(0)';
-            items[itemIndex].style.opacity = '0';
-            await sleep(animator.duration(400));
+            await anime({ targets: items[itemIndex], scale: [1, 0], opacity: [1, 0], duration: animator.duration(400), easing: 'easeInBack' }).finished;
         }
     }
 

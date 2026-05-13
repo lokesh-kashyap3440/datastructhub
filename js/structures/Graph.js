@@ -286,10 +286,14 @@ class Graph {
         this.render(this.container);
         const node = this.container?.querySelector(`[data-id="${nodeId}"]`);
         if (node) {
-            node.style.transform = 'scale(0)';
-            node.style.opacity = '0';
-            await sleep(50);
-            animator.appear(node);
+            const circle = node.querySelector('circle');
+            const text = node.querySelector('text');
+            if (circle) {
+                anime({ targets: circle, attr: { r: [0, this.nodeRadius] }, duration: animator.duration(400), easing: 'easeOutElastic(1, 0.6)' });
+            }
+            if (text) {
+                anime({ targets: text, opacity: [0, 1], duration: animator.duration(300) });
+            }
             await sleep(animator.duration(500));
         }
     }
@@ -297,9 +301,10 @@ class Graph {
     async animateNodeRemove(nodeId) {
         const node = this.container?.querySelector(`[data-id="${nodeId}"]`);
         if (node) {
-            node.style.transform = 'scale(0)';
-            node.style.opacity = '0';
-            await sleep(animator.duration(400));
+            const circle = node.querySelector('circle');
+            if (circle) {
+                await anime({ targets: circle, attr: { r: [this.nodeRadius, 0] }, opacity: [1, 0], duration: animator.duration(400), easing: 'easeInBack' }).finished;
+            }
             this.render(this.container);
         }
     }
@@ -313,9 +318,7 @@ class Graph {
             const length = edge.getTotalLength?.() || 100;
             edge.style.strokeDasharray = length;
             edge.style.strokeDashoffset = length;
-            edge.style.transition = `stroke-dashoffset ${animator.duration(500)}ms ease`;
-            await sleep(50);
-            edge.style.strokeDashoffset = '0';
+            anime({ targets: edge, strokeDashoffset: [length, 0], duration: animator.duration(500), easing: 'easeOutQuad' });
             await sleep(animator.duration(500));
         }
     }
@@ -323,9 +326,13 @@ class Graph {
     async animateNodeVisit(nodeId, state) {
         const node = this.container?.querySelector(`[data-id="${nodeId}"]`);
         if (node) {
-            // Remove previous state classes
             node.classList.remove('visited', 'current', 'path');
             node.classList.add(state);
+
+            const circle = node.querySelector('circle');
+            if (circle && state === 'current') {
+                anime({ targets: circle, attr: { r: [this.nodeRadius, this.nodeRadius + 5, this.nodeRadius] }, duration: animator.duration(600), easing: 'easeOutElastic(1, 0.5)' });
+            }
 
             if (state === 'current') {
                 soundEngine.playStep(1.0 + Math.random() * 0.3);
@@ -345,6 +352,7 @@ class Graph {
             `[data-from="${fromId}"][data-to="${toId}"], [data-from="${toId}"][data-to="${fromId}"]`
         );
         if (edge) {
+            anime({ targets: edge, stroke: ['var(--border-strong)', 'var(--active-color)'], strokeWidth: [2, 4], opacity: [0.3, 0.8], duration: animator.duration(300), easing: 'easeOutQuad' });
             edge.classList.add('visited');
             await sleep(animator.duration(200));
         }

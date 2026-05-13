@@ -121,19 +121,15 @@ class Queue {
         const items = this.container?.querySelectorAll('.queue-item');
         if (items && items.length > 0) {
             const lastItem = items[items.length - 1];
-            lastItem.style.transform = 'translateX(-40px)';
-            lastItem.style.opacity = '0';
-            await sleep(50);
-            animator.appear(lastItem);
-            await sleep(animator.duration(400));
+            animator.appear(lastItem, { translateX: [-40, 0], duration: 450 });
+            await sleep(animator.duration(450));
         }
     }
 
     async animateDequeue() {
         const firstItem = this.container?.querySelector('.queue-item');
         if (firstItem) {
-            firstItem.classList.add('dequeuing');
-            await sleep(animator.duration(400));
+            await anime({ targets: firstItem, translateX: [-40, -80], scale: [1, 0.7], opacity: [1, 0], duration: animator.duration(400), easing: 'easeInQuad' }).finished;
         }
     }
 
@@ -142,11 +138,7 @@ class Queue {
         if (frontItem) {
             const valueEl = frontItem.querySelector('.queue-value');
             if (valueEl) {
-                valueEl.style.transform = 'scale(1.15)';
-                valueEl.style.boxShadow = '0 0 24px rgba(0, 255, 136, 0.5)';
-                await sleep(animator.duration(600));
-                valueEl.style.transform = '';
-                valueEl.style.boxShadow = '';
+                await anime({ targets: valueEl, scale: [1, 1.2, 1], borderColor: ['var(--active-color)', 'var(--success)', 'var(--active-color)'], boxShadow: ['0 0 10px rgba(255,214,0,0.15)', '0 0 30px rgba(0,255,136,0.6)', '0 0 10px rgba(255,214,0,0.15)'], duration: animator.duration(600), easing: 'easeOutElastic(1, 0.5)' }).finished;
             }
         }
     }

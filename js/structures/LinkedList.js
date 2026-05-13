@@ -236,13 +236,12 @@ class LinkedList {
     async animateInsertHead() {
         const firstNode = this.container?.querySelector('.ll-node');
         if (firstNode) {
-            firstNode.style.transform = 'scale(0)';
-            firstNode.style.opacity = '0';
-            await sleep(50);
-            firstNode.style.transform = '';
-            firstNode.style.opacity = '';
-            animator.appear(firstNode);
-            await sleep(animator.duration(400));
+            animator.appear(firstNode, { duration: 450 });
+            await sleep(animator.duration(450));
+        }
+        const arrow = this.container?.querySelector('.ll-arrow');
+        if (arrow) {
+            anime({ targets: arrow, translateX: [20, 0], opacity: [0, 1], duration: animator.duration(300), easing: 'easeOutQuad' });
         }
     }
 
@@ -250,30 +249,28 @@ class LinkedList {
         const nodes = this.container?.querySelectorAll('.ll-node');
         if (nodes && nodes.length > 0) {
             const lastNode = nodes[nodes.length - 1];
-            lastNode.style.transform = 'translateX(-40px)';
-            lastNode.style.opacity = '0';
-            await sleep(50);
-            animator.appear(lastNode);
-            await sleep(animator.duration(400));
+            animator.appear(lastNode, { translateX: [-40, 0], duration: 450 });
+            await sleep(animator.duration(450));
         }
     }
 
     async animateInsertAt(index) {
         const nodes = this.container?.querySelectorAll('.ll-node');
         if (nodes && nodes[index]) {
-            nodes[index].style.transform = 'scale(0)';
-            nodes[index].style.opacity = '0';
-            await sleep(50);
-            animator.appear(nodes[index]);
-            await sleep(animator.duration(400));
+            animator.appear(nodes[index], { duration: 450 });
+            await sleep(animator.duration(450));
         }
     }
 
     async animateDeleteHead() {
         const firstNode = this.container?.querySelector('.ll-node');
         if (firstNode) {
-            firstNode.classList.add('deleting');
-            await sleep(animator.duration(400));
+            await animator.disappear(firstNode, null, { duration: 400 });
+            await sleep(animator.duration(50));
+        }
+        const arrow = this.container?.querySelector('.ll-arrow');
+        if (arrow) {
+            anime({ targets: arrow, translateX: [0, -20], opacity: [1, 0], duration: animator.duration(300), easing: 'easeInQuad' });
         }
     }
 
@@ -281,34 +278,45 @@ class LinkedList {
         const nodes = this.container?.querySelectorAll('.ll-node');
         if (nodes && nodes.length > 0) {
             const lastNode = nodes[nodes.length - 1];
-            lastNode.classList.add('deleting');
-            await sleep(animator.duration(400));
+            await animator.disappear(lastNode, null, { duration: 400 });
+            await sleep(animator.duration(50));
         }
     }
 
     async animateDeleteAt(index) {
         const nodes = this.container?.querySelectorAll('.ll-node');
         if (nodes && nodes[index]) {
-            nodes[index].classList.add('deleting');
-            await sleep(animator.duration(400));
+            await animator.disappear(nodes[index], null, { duration: 400 });
+            await sleep(animator.duration(50));
         }
     }
 
     async animateNodeSearch(index, found = false) {
         const nodes = this.container?.querySelectorAll('.ll-node');
         if (nodes && nodes[index]) {
-            nodes[index].querySelector('.ll-value')?.classList.add('searching');
+            const valueEl = nodes[index].querySelector('.ll-value');
+            if (valueEl) {
+                if (found) {
+                    await anime({ targets: valueEl, scale: [1, 1.2, 1], borderColor: ['var(--active-color)', 'var(--success)', 'var(--active-color)'], boxShadow: ['0 0 12px rgba(255,0,128,0.15)', '0 0 24px rgba(0,255,136,0.5)', '0 0 12px rgba(255,0,128,0.15)'], duration: animator.duration(400), easing: 'easeInOutQuad' }).finished;
+                } else {
+                    anime({ targets: valueEl, scale: [1, 1.1, 1], borderColor: ['var(--active-color)', 'var(--warning)', 'var(--active-color)'], duration: animator.duration(300), easing: 'easeInOutQuad' });
+                }
+            }
             soundEngine.playStep(1.0 + index * 0.05);
-            await sleep(animator.duration(300));
-            nodes[index].querySelector('.ll-value')?.classList.remove('searching');
+            await sleep(animator.duration(250));
         }
     }
 
     async animateNodeFound(index) {
         const nodes = this.container?.querySelectorAll('.ll-node');
         if (nodes && nodes[index]) {
-            nodes[index].querySelector('.ll-value')?.classList.add('found');
-            await sleep(animator.duration(600));
+            const valueEl = nodes[index].querySelector('.ll-value');
+            if (valueEl) {
+                anime({ targets: valueEl, scale: [1, 1.25, 1], borderColor: 'var(--success)', boxShadow: '0 0 30px rgba(0,255,136,0.6)', duration: animator.duration(600), easing: 'easeOutElastic(1, 0.5)' });
+                await sleep(animator.duration(700));
+                valueEl.style.borderColor = '';
+                valueEl.style.boxShadow = '';
+            }
         }
     }
 

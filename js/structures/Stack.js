@@ -117,24 +117,19 @@ class Stack {
         const items = this.container?.querySelectorAll('.stack-item');
         if (items && items.length > 0) {
             const topItem = items[0];
+            anime({ targets: topItem, scale: [1, 0.9], opacity: [1, 0.6], duration: 100 });
             topItem.classList.remove('top');
-            topItem.style.transform = 'scale(0.8)';
-            topItem.style.opacity = '0.5';
-            await sleep(50);
 
-            topItem.style.transform = '';
-            topItem.style.opacity = '';
-            topItem.classList.add('top');
-
-            // Animate new top appearing
             const newTop = this.container?.querySelector('.stack-item:first-child');
             if (newTop) {
-                newTop.style.transform = 'translateY(-30px)';
-                newTop.style.opacity = '0';
-                await sleep(50);
-                animator.appear(newTop);
-                await sleep(animator.duration(400));
+                anime({ targets: newTop, translateY: [-30, 0], opacity: [0, 1], scale: [0.8, 1], duration: animator.duration(400), easing: 'easeOutElastic(1, 0.6)' });
+                await sleep(animator.duration(100));
             }
+
+            anime({ targets: items[0], scale: [0.9, 1], opacity: [0.6, 1], duration: animator.duration(200), easing: 'easeOutQuad' });
+            await sleep(animator.duration(150));
+            topItem.classList.add('top');
+            await sleep(animator.duration(200));
         }
     }
 
@@ -142,19 +137,14 @@ class Stack {
         const items = this.container?.querySelectorAll('.stack-item');
         if (items && items.length > 0) {
             const topItem = items[0];
-            topItem.classList.add('popping');
-            await sleep(animator.duration(400));
+            await anime({ targets: topItem, translateY: [-40, -80], scale: [1, 0.6], opacity: [1, 0], rotate: [0, 15], duration: animator.duration(400), easing: 'easeInQuad' }).finished;
         }
     }
 
     async animatePeek() {
         const topItem = this.container?.querySelector('.stack-item.top');
         if (topItem) {
-            topItem.style.transform = 'scale(1.1)';
-            topItem.style.boxShadow = '0 0 24px rgba(255, 214, 0, 0.5)';
-            await sleep(animator.duration(600));
-            topItem.style.transform = '';
-            topItem.style.boxShadow = '';
+            await anime({ targets: topItem, scale: [1, 1.15, 1], borderColor: ['var(--active-color)', 'var(--warning)', 'var(--active-color)'], boxShadow: ['0 0 10px rgba(255,107,0,0.15)', '0 0 30px rgba(255,214,0,0.6)', '0 0 10px rgba(255,107,0,0.15)'], duration: animator.duration(600), easing: 'easeOutElastic(1, 0.5)' }).finished;
         }
     }
 

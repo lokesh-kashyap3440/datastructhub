@@ -370,24 +370,43 @@ class BST {
         const svg = this.container?.querySelector('.bst-svg');
         if (!svg) return;
 
-        const positions = new Map();
-        positions.set(node, { x, y });
-
-        // Re-render entire tree with animation
         this.render(this.container);
 
-        const nodeEl = svg.querySelector(`[transform="translate(${x}, ${y})"]`);
-        if (nodeEl) {
-            nodeEl.style.transform = 'scale(0)';
-            nodeEl.style.opacity = '0';
-            await sleep(50);
-            animator.appear(nodeEl);
+        const gElements = svg.querySelectorAll('.bst-node');
+        const targetG = Array.from(gElements).find(g => {
+            const text = g.querySelector('text');
+            return text && text.textContent === String(node.value);
+        });
+
+        if (targetG) {
+            const circle = targetG.querySelector('circle');
+            const text = targetG.querySelector('text');
+            if (circle) {
+                anime({ targets: circle, attr: { r: [0, this.nodeRadius] }, duration: animator.duration(400), easing: 'easeOutElastic(1, 0.6)' });
+            }
+            if (text) {
+                anime({ targets: text, opacity: [0, 1], duration: animator.duration(300), easing: 'easeOutQuad' });
+            }
             await sleep(animator.duration(500));
+        }
+
+        const edges = svg.querySelectorAll('.bst-edge');
+        if (edges.length > 0) {
+            const lastEdge = edges[edges.length - 1];
+            const prevEdge = edges.length > 1 ? edges[edges.length - 2] : null;
+            [lastEdge, prevEdge].forEach(e => {
+                if (e) {
+                    const len = e.getTotalLength ? e.getTotalLength() : 100;
+                    e.style.strokeDasharray = len;
+                    e.style.strokeDashoffset = len;
+                    anime({ targets: e, strokeDashoffset: [len, 0], opacity: [0, 1], duration: animator.duration(500), easing: 'easeOutQuad' });
+                }
+            });
         }
     }
 
     async animateComparison(value, goingLeft) {
-        await sleep(animator.duration(400));
+        await sleep(animator.duration(300));
     }
 
     async animateNodeSearch(node, depth) {
@@ -395,21 +414,28 @@ class BST {
         if (!svg) return;
 
         const gElements = svg.querySelectorAll('.bst-node');
-        let targetG = null;
-
         gElements.forEach(g => {
-            g.classList.remove('searching');
-            const text = g.querySelector('text');
-            if (text && text.textContent === String(node.value)) {
-                targetG = g;
+            const circle = g.querySelector('circle');
+            if (circle) {
+                anime({ targets: circle, attr: { r: this.nodeRadius }, stroke: 'var(--active-color)', duration: 50 });
             }
         });
 
+        const targetG = Array.from(gElements).find(g => {
+            const text = g.querySelector('text');
+            return text && text.textContent === String(node.value);
+        });
+
         if (targetG) {
-            targetG.classList.add('searching');
+            const circle = targetG.querySelector('circle');
+            if (circle) {
+                const origColor = getComputedStyle(circle).stroke || 'var(--active-color)';
+                anime({ targets: circle, attr: { r: this.nodeRadius + 4 }, stroke: 'var(--warning)', duration: animator.duration(200), easing: 'easeOutQuad' });
+                await sleep(animator.duration(50));
+                anime({ targets: circle, attr: { r: this.nodeRadius }, stroke: 'var(--active-color)', duration: animator.duration(200), easing: 'easeOutQuad' });
+            }
             soundEngine.playStep(1.0 + depth * 0.1);
-            await sleep(animator.duration(500));
-            targetG.classList.remove('searching');
+            await sleep(animator.duration(350));
         }
     }
 
@@ -417,17 +443,18 @@ class BST {
         const svg = this.container?.querySelector('.bst-svg');
         if (!svg) return;
 
-        const gElements = svg.querySelectorAll('.bst-node');
-        gElements.forEach(g => {
+        const targetG = Array.from(svg.querySelectorAll('.bst-node')).find(g => {
             const text = g.querySelector('text');
-            if (text && text.textContent === String(node.value)) {
-                g.classList.add('found');
-            }
+            return text && text.textContent === String(node.value);
         });
 
-        await sleep(animator.duration(800));
-
-        gElements.forEach(g => g.classList.remove('found'));
+        if (targetG) {
+            const circle = targetG.querySelector('circle');
+            if (circle) {
+                await anime({ targets: circle, attr: { r: [this.nodeRadius, this.nodeRadius + 6, this.nodeRadius] }, fill: 'rgba(0,255,136,0.25)', stroke: 'var(--success)', duration: animator.duration(800), easing: 'easeOutElastic(1, 0.5)' }).finished;
+                anime({ targets: circle, fill: 'var(--bg-tertiary)', stroke: 'var(--active-color)', duration: animator.duration(300), easing: 'easeOutQuad' });
+            }
+        }
     }
 
     async execute(operation, value, index) {

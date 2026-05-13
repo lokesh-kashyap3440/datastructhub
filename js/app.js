@@ -107,6 +107,7 @@ function initDOMReferences() {
     DOM.compBars = document.getElementById('compBars');
     DOM.toast = document.getElementById('toast');
 
+
     // Verify all elements exist
     const missing = [];
     ['tabBar','structureTitle','statSize','visualization',
@@ -221,8 +222,11 @@ function switchStructure(structureId) {
     console.log('[DSHub] switchStructure:', structureId);
 
     if (AppState.isAnimating) {
-        showToast('Wait for animation to finish', 'warning');
-        return;
+        anime.remove('*');
+        AppState.isAnimating = false;
+        DOM.executeBtn.disabled = false;
+        DOM.randomBtn.disabled = false;
+        DOM.clearBtn.disabled = false;
     }
 
     // Update tab active state
@@ -262,16 +266,16 @@ function switchStructure(structureId) {
         DOM.spaceBadge.style.borderColor = `${color}33`;
     }
 
-    // Clear and render
-    DOM.visualization.innerHTML = '';
-
-    const ds = AppState.structures[structureId];
-    console.log(`[DSHub] Rendering ${structureId}, ds:`, ds);
-
-    if (ds) {
-        ds.render(DOM.visualization);
-        updateStats();
-    }
+    // Clear and render with fade transition
+    anime({ targets: DOM.visualization, opacity: [1, 0], duration: 150, easing: 'easeOutQuad', complete: () => {
+        DOM.visualization.innerHTML = '';
+        const ds = AppState.structures[structureId];
+        if (ds) {
+            ds.render(DOM.visualization);
+            updateStats();
+        }
+        anime({ targets: DOM.visualization, opacity: [0, 1], duration: 200, easing: 'easeOutQuad' });
+    }});
 
     AppState.currentStructure = structureId;
     console.log('[DSHub] switchStructure complete');
@@ -551,6 +555,7 @@ function updateStats() {
     const size = (typeof ds.size === 'function') ? ds.size() : (ds.size ?? (ds.data?.length ?? (ds.items?.length ?? (ds.heap?.length ?? 0))));
 
     DOM.statSize.textContent = size;
+    anime({ targets: DOM.statSize, scale: [1, 1.3, 1], duration: 300, easing: 'easeOutElastic(1, 0.5)' });
     console.log('[DSHub] stats updated — size:', size);
 }
 
