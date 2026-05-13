@@ -16,6 +16,9 @@ Thumbs.db
 .idea/
 *.swp
 
+# Build output
+dist/
+
 # Misc
 *.log
 .env
